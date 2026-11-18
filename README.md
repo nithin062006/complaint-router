@@ -30,11 +30,29 @@ model because 63% of complaints are about credit reporting.
   are hard because complaints overlap: a buy-now-pay-later complaint about Affirm is labelled personal loan, and a car-loan
   complaint about credit reporting is labelled credit reporting. A bigger model won't fix that. Cleaning or redefining the labels would.
 
+## LLM comparison
+Zero-shot Claude Sonnet 5.5 against the trained ensemble on the **same 180 held-out complaints from 2023+** (a balanced sample,
+20 per category, so small classes are measured). The model saw only the first 600 characters of each complaint and the list of
+9 category names, with no examples and no tuning. True labels were kept hidden until after it answered.
+
+| | Accuracy | Macro-F1 |
+|---|---|---|
+| Claude Sonnet 5.5, zero-shot | 81.1% | 0.806 |
+| Trained ensemble | 81.7% | 0.818 |
+
+They agreed on 85% of complaints. The LLM was better on debt collection, student loans and vehicle loans; the trained model was
+much better on money transfers (F1 0.76 vs 0.57), where the CFPB's labels follow conventions a zero-shot model can't guess.
+
+Caveats: with 180 examples the margin of error is roughly 3 points either way, so the difference between the two is not
+statistically meaningful. This was one pass by one model, with a single prompt and no cost or latency measurement.
+The LLM may also have seen CFPB data during its training. `llm_eval.py` runs the same comparison through the Gemini API (not run yet).
+The balanced sample scores lower than the 20,000-complaint test because small, confusable classes count equally.
+
 ## Limits
 - Accuracy is 88%, not 99%. About 1 in 8 complaints is routed to the wrong category.
 - The training data is US consumer finance. It will not transfer to other domains without new labelled data.
 - The model reads one text and gives one product label. It does not understand the issue, urgency or sentiment.
-- I did not compare against an LLM. That is an obvious next experiment.
+- The LLM comparison above is small (180 complaints), so treat it as a sanity check, not a benchmark.
 
 ## Run it
 ```
