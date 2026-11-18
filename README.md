@@ -30,6 +30,22 @@ model because 63% of complaints are about credit reporting.
   are hard because complaints overlap: a buy-now-pay-later complaint about Affirm is labelled personal loan, and a car-loan
   complaint about credit reporting is labelled credit reporting. A bigger model won't fix that. Cleaning or redefining the labels would.
 
+## Auto-route only what the model is sure of
+Most support teams don't want 100% automation; they want to automate the easy majority and send the rest to a person.
+I pick a confidence threshold on 2022 validation data, then check it on the untouched 2023+ test set (`threshold.py`):
+
+| Target accuracy | Auto-routed (test) | Accuracy on those (test) | Macro-F1 on those |
+|---|---|---|---|
+| none (route everything) | 100% | 88.2% | 0.781 |
+| 90% | 97.4% | 89.6% | 0.807 |
+| 92% | 91.5% | 91.9% | 0.846 |
+| 95% | 79.3% | 95.0% | 0.896 |
+| 97% | 59.0% | 97.5% | 0.879 |
+| 98% | 47.5% | 98.4% | 0.857 |
+
+The validation thresholds held up on the later test years to within about a point, so the confidence scores are trustworthy.
+In practice: auto-route about 79% of complaints at 95% accuracy and send the other 21% to a human.
+
 ## LLM comparison
 Zero-shot Claude Sonnet 5.5 against the trained ensemble on the **same 180 held-out complaints from 2023+** (a balanced sample,
 20 per category, so small classes are measured). The model saw only the first 600 characters of each complaint and the list of
